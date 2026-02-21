@@ -14,6 +14,15 @@ Developed with a "native-first" philosophy, Bubble-Siphon utilizes built-in syst
 2. **Native Binary Chaining:** Utilizing `find`, `awk`, `sed`, and `grep` with optimized regex to perform complex data analysis without installing dependencies.
 3. **In-Memory Operations:** Where possible, data is processed in streams to minimize forensic artifacts on the disk.
 
+---
+
+## 🛠️ Labs & Testing
+This tool was used as a real-world benchmark for the:
+* **[Pickle Rick Lab](https://github.com/MoriartyPuth/Pickle-Rick-Lab)**.
+* **[N7 Lab](https://github.com/MoriartyPuth/N7-Lab)**.
+
+---
+
 ## 🚀 Key Capabilities
 
 ### 🔍 Automated Data Scavenging
