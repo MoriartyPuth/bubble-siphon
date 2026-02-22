@@ -17,9 +17,9 @@ Developed with a "native-first" philosophy, Bubble-Siphon utilizes built-in syst
 ---
 
 ## 🛠️ Labs & Testing
-This tool was used as a real-world benchmark for the:
-* **[Pickle Rick Lab](https://github.com/MoriartyPuth/Pickle-Rick-Lab)**.
-* **[N7 Lab](https://github.com/MoriartyPuth/N7-Lab)**.
+Tested & Verified Against:
+* ✅ **[Pickle Rick Lab](https://github.com/MoriartyPuth/Pickle-Rick-Lab)**.
+* ✅ **[N7 Lab](https://github.com/MoriartyPuth/N7-Lab)**.
 
 ---
 
